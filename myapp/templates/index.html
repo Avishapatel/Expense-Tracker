@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Tracker</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+        }
+        .topbar {
+    position: fixed;
+    top: 0;
+    right: 0;
+
+    width: calc(100% - 320px);  /* sidebar width minus */
+    margin-left: 240px;
+
+    padding: 15px 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+
+    background: white;
+    z-index: 1000;
+}
+.topbar a{
+    text-decoration: none;
+    color: rgb(51, 51, 154);
+    font-size: 17px;
+}
+.topbar a:hover{
+    color: #d67165;
+}
+
+
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            position: fixed;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            margin: 15px 0;
+        }
+
+        
+        /* Main Content */
+        
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+            .main-card {
+                display: flex;
+                width: 100%;
+                gap: 20px;            /* cards ke beech space */
+            }
+            .main-card .card{
+                flex: 1;              /* 🔥 sab cards equal width */
+                text-align: center;
+
+            }
+            
+
+            .card {
+                background: white;
+                padding: 20px;
+                border-radius: 6px;
+                margin-bottom: 20px;
+                
+            }
+
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background: #ecf0f1;
+        }
+
+        /* Form */
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            padding: 6px 12px;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .edit-btn {
+            background: green;
+            padding: 6px 12px;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+     
+    </style>
+</head>
+
+{% block Content %}
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>Expense Tracker</h2>
+    <a href="#">Dashboard</a>
+    <a href="#">Add Expense</a>
+    <a href="#">Expense List</a>
+</div>
+
+<!-- Main Content -->
+ <div class="topbar">
+    {% if request.session.user_name %}
+                                <a href="#" class="">Hi, {{ request.session.user_name }}</a>
+                                <a href="{% url 'logout_view' %}" class="">Logout</a>  <!-- <-- use logout URL -->
+                            {% else %}
+                                <a href="{% url 'login' %}" class="">Login</a>
+                                <a href="{% url 'register' %}" class="">Register</a>
+                            {% endif %}
+</div>
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        {% if 'logout' in message.tags %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <script>
+                setTimeout(function() {
+                    $('.alert').fadeOut('slow', function() { $(this).remove(); });
+                }, 3000);  <!-- auto-dismiss after 3 seconds -->
+            </script>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="main">
+
+    <!-- Dashboard -->
+     <div class="main-card">
+    <div class="card">
+        <h3>Salary</h3>
+        <!-- <h2>₹ {{salary}}</h2>
+        <form action="{% url 'edit_salary' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Edit</button>
+        </form> -->
+        <div id="salary-view">
+           <h2>₹ <span id="salary-value">{{salary}}</span></h2>
+            <button id="edit-salary-btn" type="button">Edit</button>
+        </div>
+
+       <div id="salary-edit" style="display:none; margin-top:10px;">
+           <form id="salary-form" action="{% url 'edit_salary' %}" method="post">
+                {% csrf_token %}
+                <input type="number" name="salary" min="0" required value="{{salary}}" />
+                <div style="margin-top:8px;">
+                    <button type="submit">Save</button>
+                    <button type="button" id="salary-close">Close</button>
+                </div>
+            </form>
+        </div>
+     
+     
+    </div>
+    <div class="card">
+        <h3>Total Expense</h3>
+        <h2>₹ {{total_expense}}</h2>
+    </div>
+    <div class="card">
+        <h3>Disposable Income</h3>
+        <h2>₹ {{disposable_amount}}</h2>
+    </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var editBtn = document.getElementById('edit-salary-btn');
+  var closeBtn = document.getElementById('salary-close');
+  var editDiv = document.getElementById('salary-edit');
+  var viewBtn = document.getElementById('edit-salary-btn');
+
+  if (editBtn) {
+    editBtn.addEventListener('click', function() {
+      editDiv.style.display = 'block';
+      viewBtn.style.display = 'none';
+    });
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+      editDiv.style.display = 'none';
+      viewBtn.style.display = 'inline-block';
+    });
+  }
+});
+</script>
+    <!-- Add Expense -->
+    <div class="card">
+        <h3>Add Expense</h3>
+
+        <form action="{% url 'add_expense' %}" method="post"> 
+            {% csrf_token %}
+            <label>Title</label>
+            <input type="text" placeholder="e.g. Grocery" name="title" required>
+
+            <label>Amount</label>
+            <input type="number" placeholder="e.g. 500" name="amount" required>
+
+            <label>Category</label>
+
+            <select name="category" required>
+                {% for cat in c_id%}
+                <option value="{{cat.cat_name}}">{{cat.cat_name}}</option>
+                {% endfor %}
+                
+            </select>
+
+            <button type="submit">Add Expense</button>
+        </form>
+    </div>
+
+    <!-- Expense List -->
+    <div class="card">
+        <h3>Expense List</h3>
+
+        <table>
+            <tr>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Action</th>
+            </tr>
+            {% for expense in expense_id %}
+            <tr>
+                <td>{{expense.title}}</td>
+                <td>₹ {{expense.amount}}</td>
+                <td>{{expense.category}}</td>
+                <td>
+                    <div style="display: flex;">
+                    <form action="{% url 'edit' %}?expense_id={{expense.id}}" method="post">
+                        {% csrf_token %}
+                    <button type='submit' class="edit-btn" style="margin-right: 10px;">Edit</button>
+                    </form>
+                    <form action="{% url 'delete' %}?expense_id={{expense.id}}" method="post">
+                        {% csrf_token %}
+                    <button class="delete-btn" type="submit">Delete</button>
+                    </form>
+                </div>
+            </td>
+            </tr>
+            {% endfor %}
+           
+        </table>
+    </div>
+
+</div>
+{% endblock %}
+</body>
+</html>
