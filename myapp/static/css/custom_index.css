@@ -1,0 +1,200 @@
+/* ...existing code... */
+/* Enhanced custom styling */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600&display=swap');
+
+:root{
+  --accent: #D19C97;
+  --accent-2: #FFBDAA;
+  --bg-1: #f6f8fb;
+  --text: #1C1C1C;
+  --muted: #6F6F6F;
+  --glass: rgba(255,255,255,0.7);
+  --radius: 14px;
+  --card-shadow: 0 10px 30px rgba(20,20,50,0.06);
+   --salary-color: #FF7A59;
+}
+
+html,body {
+  height: 100%;
+  background: linear-gradient(180deg, #fbfbfd 0%, #f2f5f9 100%);
+  font-family: 'Inter', 'Poppins', sans-serif;
+  color: var(--text);
+}
+
+/* topbar */
+.topbar {
+  background: linear-gradient(90deg, rgba(209,156,151,0.08), rgba(255,189,170,0.02));
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.topbar .brand h1 {
+  font-size: 22px;
+  color: var(--accent);
+  margin: 0;
+  font-weight: 700;
+}
+.topbar .brand-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* hero */
+.hero {
+  padding: 28px 0;
+}
+.hero .hero-left h2 {
+  font-size: 28px;
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+.hero .lead {
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.hero-right .balance-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+  padding: 18px 22px;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  min-width: 220px;
+  text-align: right;
+  border: 1px solid rgba(255,255,255,0.65);
+}
+.balance-label { font-size: 12px; color: var(--muted); }
+.balance-amount { font-size: 28px; font-weight: 700; color: var(--text); }
+.small.text-muted { color: var(--muted); }
+
+/* card + dashboard */
+.card {
+  border-radius: var(--radius);
+  border: none;
+  box-shadow: var(--card-shadow);
+}
+.info-card .card-body h6.muted { color: var(--muted); font-weight: 600; font-size: 13px; }
+.info-card .card-body h3.accent { color: var(--accent); font-size: 22px; margin: 0; }
+
+/* buttons */
+.btn-pill { border-radius: 999px; padding-left: 18px; padding-right: 18px; }
+.btn-primary { background: linear-gradient(90deg,var(--accent), var(--accent-2)); border: none; color: #fff; box-shadow: 0 8px 18px rgba(209,156,151,0.12); }
+.btn-outline-primary { border-color: var(--accent); color: var(--accent); }
+.btn:focus { box-shadow: none; outline: none; }
+
+/* sidebar */
+.sidebar {
+  background: rgba(255,255,255,0.95);
+  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid rgba(237,241,255,0.6);
+}
+.sidebar .nav-link { font-weight: 600; color: #4b4b4b; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.sidebar .nav-link.active { background: linear-gradient(90deg, rgba(209,156,151,0.06), rgba(255,189,170,0.02)); color: var(--accent); }
+
+/* table */
+.table thead th { background: transparent; color: var(--muted); font-weight: 600; }
+.table tbody tr:hover { background: linear-gradient(90deg, rgba(209,156,151,0.03), transparent); }
+
+/* small responsive */
+@media (max-width: 768px) {
+  .hero { padding: 16px 0; }
+  .hero .hero-left h2 { font-size: 20px; }
+  .sidebar { display: none; }
+  .hero-right { margin-top: 10px; }
+}
+
+/* subtle interactions */
+.btn, .nav-link, .card { transition: all 0.18s ease; }
+.btn:hover { transform: translateY(-2px); }
+
+
+/* Make dashboard cards equal height */
+.dashboard-cards > .col-md-4 {
+  display: flex;
+}
+.dashboard-cards .info-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 140px; /* adjust value to taste */
+}
+.dashboard-cards .info-card .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Mobile: restore normal flow */
+@media (max-width: 767.98px) {
+  .dashboard-cards > .col-md-4 { display: block; }
+  .dashboard-cards .info-card { min-height: 0; }
+}
+
+/* Salary card layout to match other info cards */
+.salary-card .card-top { gap: 8px; }
+.salary-card .card-top h6 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; }
+.salary-card .salary-amount h3 { font-size: 22px; margin: 6px 0 0; color: var(--accent); font-weight: 700; }
+
+/* Keep edit button small & out of layout flow on small screens */
+#edit-salary-btn { padding: .25rem .5rem; font-size: .78rem; }
+@media (max-width: 576px) {
+  #edit-salary-btn { padding: .2rem .45rem; font-size: .72rem; }
+}
+/* ensure salary card is positioned for absolute button */
+.salary-card { position: relative; padding-bottom: 52px; }
+
+/* salary amount color */
+.salary-card .salary-value { color: var(--salary-color); font-weight: 700; }
+
+/* bottom-right button */
+.salary-edit-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  border-radius: 999px;
+  padding: .35rem .6rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border: none;
+  box-shadow: 0 10px 24px rgba(13,110,116,0.12);
+  transition: transform .12s ease, box-shadow .12s ease;
+  z-index: 10;
+}
+.salary-edit-btn:hover { transform: translateY(-2px); }
+
+/* on very small screens make the button flow below the card content */
+@media (max-width: 576px) {
+  .salary-card { padding-bottom: 16px; }
+  .salary-edit-btn {
+    position: static;
+    display: inline-block;
+    margin-top: 10px;
+    box-shadow: none;
+  }
+}
+
+/* Edit expense page polish */
+.page {
+    min-height: 70vh;
+}
+
+.card {
+    border-radius: 14px;
+}
+
+.card-header h5 {
+    font-weight: 600;
+}
+
+.form-group label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.btn-pill {
+    border-radius: 30px;
+    font-weight: 500;
+}
+
+
+
+

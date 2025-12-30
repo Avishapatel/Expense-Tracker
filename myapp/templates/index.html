@@ -1,308 +1,285 @@
 
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Expense Tracker</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-        }
-        .topbar {
-    position: fixed;
-    top: 0;
-    right: 0;
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-    width: calc(100% - 320px);  /* sidebar width minus */
-    margin-left: 240px;
+    <!-- keep existing global styles -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <!-- new page specific styles -->
+    <link href="{% static 'css/custom_index.css' %}" rel="stylesheet">
 
-    padding: 15px 30px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-
-    background: white;
-    z-index: 1000;
-}
-.topbar a{
-    text-decoration: none;
-    color: rgb(51, 51, 154);
-    font-size: 17px;
-}
-.topbar a:hover{
-    color: #d67165;
-}
-
-
-
-        /* Sidebar */
-        .sidebar {
-            width: 220px;
-            height: 100vh;
-            background-color: #2c3e50;
-            color: white;
-            padding: 20px;
-            position: fixed;
-        }
-
-        .sidebar h2 {
-            margin-bottom: 30px;
-        }
-
-        .sidebar a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            margin: 15px 0;
-        }
-
-        
-        /* Main Content */
-        
-        .main {
-            margin-left: 240px;
-            padding: 30px;
-        }
-            .main-card {
-                display: flex;
-                width: 100%;
-                gap: 20px;            /* cards ke beech space */
-            }
-            .main-card .card{
-                flex: 1;              /* 🔥 sab cards equal width */
-                text-align: center;
-
-            }
-            
-
-            .card {
-                background: white;
-                padding: 20px;
-                border-radius: 6px;
-                margin-bottom: 20px;
-                
-            }
-
-
-        /* Table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table th, table td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        table th {
-            background: #ecf0f1;
-        }
-
-        /* Form */
-        input, select {
-            width: 100%;
-            padding: 8px;
-            margin: 8px 0 15px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            background: #3498db;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .delete-btn {
-            background: #e74c3c;
-            padding: 6px 12px;
-            color: white;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .edit-btn {
-            background: green;
-            padding: 6px 12px;
-            color: white;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        
-     
-    </style>
 </head>
 
-{% block Content %}
+
 <body>
+<nav class="topbar">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div class="brand">
+      <h1>Expense Tracker</h1>
+      <p class="brand-sub">Smart budgeting made beautiful</p>
+    </div>
+    <div class="nav-actions">
+      {% if request.session.user_name %}
+        <span class="user" style="margin-right: 15px;">Hi, {{ request.session.user_name }}</span>
+        <a href="{% url 'logout_view' %}" class="btn btn-sm" style="background-color: #ff4d4f; color: white; border: none;">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-light btn-sm">Register</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+{% block Content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="container d-flex align-items-center justify-content-between">
+    <div class="hero-left">
+      <h2>Welcome{% if request.session.user_name %}, {{ request.session.user_name }}{% endif %} 👋</h2>
+      <p class="lead">Keep track of your spending, set goals and save more.</p>
+     
+    </div>
+    <div class="hero-right">
+      <div class="balance-card">
+        <div class="balance-label">Disposable</div>
+        <div class="balance-amount">₹ <span class="count" data-target="{{ disposable_amount|default:0 }}">0</span></div>
+        <div class="small text-muted">Salary: ₹ <span class="count" data-target="{{ salary|default:0 }}">0</span> · Spent: ₹ <span class="count" data-target="{{ total_expense|default:0 }}">0</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<!-- Sidebar -->
-<div class="sidebar">
-    <h2>Expense Tracker</h2>
-    <a href="#">Dashboard</a>
-    <a href="#">Add Expense</a>
-    <a href="#">Expense List</a>
-</div>
+<div class="page container">
+  <div class="row mt-5 pt-4">
+    <!-- Sidebar -->
+    <aside class="col-md-3 sidebar">
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="#add-category">Add Category</a></li>
+        <li class="nav-item"><a class="nav-link" href="#add-expense">Add Expense</a></li>
+        <li class="nav-item"><a class="nav-link" href="#expense-list">Expense List</a></li>
+        
+      </ul>
+    </aside>
 
-<!-- Main Content -->
- <div class="topbar">
-    {% if request.session.user_name %}
-                                <a href="#" class="">Hi, {{ request.session.user_name }}</a>
-                                <a href="{% url 'logout_view' %}" class="">Logout</a>  <!-- <-- use logout URL -->
-                            {% else %}
-                                <a href="{% url 'login' %}" class="">Login</a>
-                                <a href="{% url 'register' %}" class="">Register</a>
-                            {% endif %}
-</div>
+    <!-- Main -->
+    <main class="col-md-9">
+      <div class="row dashboard-cards">
+       <div class="col-md-4">
+          <div class="card info-card salary-card">
+            <div class="card-body">
+              <div class="card-top d-flex justify-content-between align-items-start">
+                <h6 class="muted" style="font-weight: bold;">Salary</h6>
+              
+              </div>
 
-{% if messages %}
-<div class="container mt-3">
-    {% for message in messages %}
-        {% if 'logout' in message.tags %}
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+              <div class="salary-amount mt-2">
+                <h3 class="salary-value">₹ <span id="salary-value" class="count" data-target="{{ salary|default:0 }}">0</span></h3>
+              </div>
+              
+
+              <div id="salary-edit" class="mt-3 d-none">
+                <form id="salary-form" action="{% url 'edit_salary' %}" method="post">
+                  {% csrf_token %}
+                  <div class="input-group mb-2">
+                    <input type="number" name="salary" min="0" required class="form-control form-control-sm" value="{{ salary }}">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                        <button type="button" id="salary-close" class="btn btn-sm btn-secondary ml-2">Close</button>
+                        </div>
+
+                  </div>
+                </form>
+              </div>
+
+              <button id="edit-salary-btn" class="btn btn-sm salary-edit-btn" aria-label="Edit salary">Edit</button>
             </div>
-            <script>
-                setTimeout(function() {
-                    $('.alert').fadeOut('slow', function() { $(this).remove(); });
-                }, 3000);  <!-- auto-dismiss after 3 seconds -->
-            </script>
-        {% endif %}
-    {% endfor %}
-</div>
-{% endif %}
-
-<div class="main">
-
-    <!-- Dashboard -->
-     <div class="main-card">
-    <div class="card">
-        <h3>Salary</h3>
-        <!-- <h2>₹ {{salary}}</h2>
-        <form action="{% url 'edit_salary' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Edit</button>
-        </form> -->
-        <div id="salary-view">
-           <h2>₹ <span id="salary-value">{{salary}}</span></h2>
-            <button id="edit-salary-btn" type="button">Edit</button>
+          </div>
         </div>
 
-       <div id="salary-edit" style="display:none; margin-top:10px;">
-           <form id="salary-form" action="{% url 'edit_salary' %}" method="post">
-                {% csrf_token %}
-                <input type="number" name="salary" min="0" required value="{{salary}}" />
-                <div style="margin-top:8px;">
-                    <button type="submit">Save</button>
-                    <button type="button" id="salary-close">Close</button>
-                </div>
+        <div class="col-md-4">
+          <div class="card info-card">
+            <div class="card-body">
+              <h6 class="muted" style="font-weight: bold;">Total Expense</h6>
+              <h3>₹ <span class="count" data-target="{{ total_expense|default:0 }}">0</span></h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card info-card">
+            <div class="card-body">
+              <h6 class="muted" style="font-weight: bold;">Disposable Income</h6>
+              <h3>₹ <span class="count" data-target="{{ disposable_amount|default:0 }}">0</span></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<!-- Add Category -->
+<section id="add-category" class="mt-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Add Category</h5>
+          </div>
+          <div class="card-body">
+            <form action="{% url 'add_category' %}" method="post" class="row">
+              {% csrf_token %}
+              <div class="col-md-4 form-group">
+                <label>Category</label>
+                <input type="text" class="form-control" name="category" placeholder="e.g. Food" required>
+              </div>
+             
+              <div class="col-12 text-right">
+                <button class="btn btn-primary btn-pill">Add Category</button>
+              </div>
             </form>
+          </div>
         </div>
-     
-     
-    </div>
-    <div class="card">
-        <h3>Total Expense</h3>
-        <h2>₹ {{total_expense}}</h2>
-    </div>
-    <div class="card">
-        <h3>Disposable Income</h3>
-        <h2>₹ {{disposable_amount}}</h2>
-    </div>
-    </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var editBtn = document.getElementById('edit-salary-btn');
-  var closeBtn = document.getElementById('salary-close');
-  var editDiv = document.getElementById('salary-edit');
-  var viewBtn = document.getElementById('edit-salary-btn');
+      </section>
 
-  if (editBtn) {
-    editBtn.addEventListener('click', function() {
-      editDiv.style.display = 'block';
-      viewBtn.style.display = 'none';
-    });
-  }
-  if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
-      editDiv.style.display = 'none';
-      viewBtn.style.display = 'inline-block';
-    });
-  }
+
+      <!-- Add Expense -->
+      <section id="add-expense" class="mt-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Add Expense</h5>
+          </div>
+          <div class="card-body">
+            <form action="{% url 'add_expense' %}" method="post" class="row">
+              {% csrf_token %}
+              <div class="col-md-4 form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" name="title" placeholder="e.g. Grocery" required>
+              </div>
+              <div class="col-md-3 form-group">
+                <label>Date</label>
+                <input type="date" class="form-control" name="date" required>
+              </div>
+              <div class="col-md-2 form-group">
+                <label>Amount</label>
+                <input type="number" class="form-control" name="amount" min="0" required>
+              </div>
+              <div class="col-md-3 form-group">
+                <label>Category</label>
+                <select name="category" class="form-control" required>
+                  {% for cat in c_id %}
+                    <option value="{{ cat.cat_name }}">{{ cat.cat_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-12 text-right">
+                <button class="btn btn-primary btn-pill">Add Expense</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Expense List -->
+      <section id="expense-list" class="mt-4">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Expense List</h5>
+            
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+                
+              <table class="table table-hover mb-0">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for expense in expense_id %}
+                  <tr>
+                    <td>{{ expense.title }}</td>
+                    <td>{{ expense.date|date:"Y-m-d" }}</td>
+                    <td>₹ {{ expense.amount }}</td>
+                    <td>{{ expense.category }}</td>
+                    <td class="text-right">
+                      <div class="btn-group" role="group">
+                        <form action="{% url 'edit' %}?expense_id={{ expense.id }}" method="post" class="d-inline">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-sm btn-outline-success">Edit</button>
+                        </form>
+                        <form action="{% url 'delete' %}?expense_id={{ expense.id }}" method="post" class="d-inline ml-2">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr><td colspan="5" class="text-center p-4">No expenses yet.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  const editBtn = document.getElementById('edit-salary-btn');
+  const editDiv = document.getElementById('salary-edit');
+  const closeBtn = document.getElementById('salary-close');
+
+  /* EDIT BUTTON CLICK */
+  editBtn.addEventListener('click', function () {
+    editDiv.classList.remove('d-none');  // show form
+    editBtn.classList.add('d-none');     // hide edit button
+  });
+
+  /* CLOSE BUTTON CLICK */
+  closeBtn.addEventListener('click', function () {
+    editDiv.classList.add('d-none');     // hide form
+    editBtn.classList.remove('d-none');  // show edit button
+  });
+// simple counter animation
+  document.querySelectorAll('.count').forEach(function(el) {
+    var end = +el.getAttribute('data-target') || 0;
+    var start = 0;
+    var duration = 900;
+    var stepTime = Math.max(10, Math.floor(duration / (end || 1)));
+    var current = start;
+    var timer = setInterval(function() {
+      current += Math.ceil(Math.max(1, end / (duration / stepTime)));
+      if (current >= end) {
+        el.textContent = end.toLocaleString();
+        clearInterval(timer);
+      } else {
+        el.textContent = current.toLocaleString();
+      }
+    }, stepTime);
+  });
+
 });
 </script>
-    <!-- Add Expense -->
-    <div class="card">
-        <h3>Add Expense</h3>
 
-        <form action="{% url 'add_expense' %}" method="post"> 
-            {% csrf_token %}
-            <label>Title</label>
-            <input type="text" placeholder="e.g. Grocery" name="title" required>
 
-            <label>Amount</label>
-            <input type="number" placeholder="e.g. 500" name="amount" required>
-
-            <label>Category</label>
-
-            <select name="category" required>
-                {% for cat in c_id%}
-                <option value="{{cat.cat_name}}">{{cat.cat_name}}</option>
-                {% endfor %}
-                
-            </select>
-
-            <button type="submit">Add Expense</button>
-        </form>
-    </div>
-
-    <!-- Expense List -->
-    <div class="card">
-        <h3>Expense List</h3>
-
-        <table>
-            <tr>
-                <th>Title</th>
-                <th>Amount</th>
-                <th>Category</th>
-                <th>Action</th>
-            </tr>
-            {% for expense in expense_id %}
-            <tr>
-                <td>{{expense.title}}</td>
-                <td>₹ {{expense.amount}}</td>
-                <td>{{expense.category}}</td>
-                <td>
-                    <div style="display: flex;">
-                    <form action="{% url 'edit' %}?expense_id={{expense.id}}" method="post">
-                        {% csrf_token %}
-                    <button type='submit' class="edit-btn" style="margin-right: 10px;">Edit</button>
-                    </form>
-                    <form action="{% url 'delete' %}?expense_id={{expense.id}}" method="post">
-                        {% csrf_token %}
-                    <button class="delete-btn" type="submit">Delete</button>
-                    </form>
-                </div>
-            </td>
-            </tr>
-            {% endfor %}
-           
-        </table>
-    </div>
-
-</div>
 {% endblock %}
+
 </body>
 </html>

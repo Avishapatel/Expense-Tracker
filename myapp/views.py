@@ -9,10 +9,10 @@ def home(request):
 
 def index(request):
     if "email_id" in request.session or "user_name" in request.session:
-        c_id=Category.objects.all()
         register_user=Register.objects.get(email_id=request.session['email_id'])
+        c_id=Category.objects.filter(register_user=register_user)
         expense_id=Add_Expense.objects.filter(register_user=register_user)
-        print(expense_id)
+       
         salary=register_user.salary
         total_expense=0
     
@@ -25,15 +25,25 @@ def index(request):
     else:
         return render(request,'login.html')
 
+def add_category(request):
+    if "email_id" in request.session or "user_name" in request.session:
+        register_user=Register.objects.get(email_id=request.session['email_id'])
+        cat_name=request.POST.get('category').strip()
+        Category.objects.create(register_user=register_user,cat_name=cat_name)
+        return redirect('index')
+    else:
+        return render(request,'login.html')
+    
 def add_expense(request):
     if "email_id" in request.session or "user_name" in request.session:
         if request.POST:
             register_user=Register.objects.get(email_id=request.session['email_id'])
             title=request.POST.get('title').strip()
+            date=request.POST.get('date').strip()
             amount=request.POST.get('amount').strip()
             category=request.POST.get('category').strip()
-            print("hello")
-            Add_Expense.objects.create(register_user=register_user,title=title,amount=amount,category=category)
+    
+            Add_Expense.objects.create(register_user=register_user,date=date,title=title,amount=amount,category=category)
             return redirect('index')
         else:
             return render(request,'login.html')
@@ -41,10 +51,11 @@ def add_expense(request):
 
 def edit(request):
     if "email_id" in request.session or "user_name" in request.session:
-        c_id=Category.objects.all()
+        register_user=Register.objects.get(email_id=request.session['email_id'])
+        c_id=Category.objects.filter(register_user=register_user)
         edit_expense_id=request.GET.get('expense_id')
         edit_expense=Add_Expense.objects.get(id=edit_expense_id)
-        print("hello",edit_expense.category)
+       
         context={'c_id':c_id,'edit_expense_id':edit_expense_id,'edit_expense':edit_expense,'category':edit_expense.category}
         return render(request,'edit_expense.html',context) 
     else:
@@ -68,17 +79,18 @@ def edit_expense(request):
             edit_expense_id=request.GET.get('expense_id')
             edit_expense=Add_Expense.objects.get(id=edit_expense_id)
             title=request.POST.get('title').strip()
+            date=request.POST.get('date').strip()
             amount=request.POST.get('amount').strip()
             category=request.POST.get('category').strip()
-            if not all([title,amount,category]):
+            if not all([title,amount,category,date]):
                 return render(request, 'edit_expense.html', {'alert': 'Please fill all fields.', "c_id": c_id,})
             edit_expense.title=title
+            edit_expense.date=date
             edit_expense.amount=amount
             edit_expense.category=category
             edit_expense.save()
-            context={'c_id':Category.objects.all(),
-            'expense_id':Add_Expense.objects.all()}
-            return render(request,'index.html',context)
+           
+            return redirect('index')
         context={'c_id':Category.objects.all(),
         'expense_id':Add_Expense.objects.all()}
         return render(request,'edit_expense.html',context) 

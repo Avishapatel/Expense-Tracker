@@ -2,10 +2,7 @@ from django.db import models
 from .models import *
 
 # Create your models here.
-class Category(models.Model):
-    cat_name=models.TextField(max_length=10)
-    def __str__(self):
-        return self.cat_name
+
 
 class Register(models.Model):
     full_name=models.CharField(max_length=100)
@@ -16,9 +13,16 @@ class Register(models.Model):
     confirm_password=models.CharField(max_length=100)
     def __str__(self):
         return self.full_name
-    
+
+class Category(models.Model):
+    register_user=models.ForeignKey(Register, on_delete=models.CASCADE, null=True, blank=True)
+    cat_name=models.TextField(max_length=10)
+    def __str__(self):
+        return self.cat_name
+      
 class Add_Expense(models.Model):
     register_user=models.ForeignKey(Register, on_delete=models.CASCADE, null=True, blank=True)
+    date=models.DateField(null=True, blank=True)
     title=models.TextField()
     amount=models.FloatField()
     category=models.TextField()
